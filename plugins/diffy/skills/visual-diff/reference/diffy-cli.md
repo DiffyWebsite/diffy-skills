@@ -85,5 +85,7 @@ Fields in the `--format=json` output (`$diff->data`) the skill uses:
 
 ```bash
 diffy screenshot:list <PROJECT_ID> --limit=1       # inspect recent screenshot sets (PHP var_export dump)
+diffy screenshot:get-status <SCREENSHOT_ID>        # capture finished? (prints 1, or empty when not done)
+diffy screenshot:get-status <SCREENSHOT_ID> --format=json   # state + progress + estimate (parse this)
 diffy diff:list <PROJECT_ID> 0                      # table of recent diffs (id, changes, state, sharedUrl)
 ```

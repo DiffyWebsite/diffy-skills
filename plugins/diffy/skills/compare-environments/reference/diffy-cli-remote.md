@@ -40,6 +40,19 @@ diffy screenshot:create <PROJECT_ID> <ENVIRONMENT> --wait      # prints SCREENSH
 - `--wait` polls every 10s until Diffy finishes (default `--max-wait=1200` seconds). Without it the command
   returns the ID immediately and Diffy keeps capturing in the background.
 
+Check a set started without `--wait`:
+
+```bash
+diffy screenshot:get-status <SCREENSHOT_ID>                  # prints 1 when done, empty when not
+diffy screenshot:get-status <SCREENSHOT_ID> --format=json    # state + progress + estimate (parse this)
+```
+
+The JSON form returns `completed`, `state` (`-1` stopped, `0` queued, `1` in progress, `2`/`3`/`4`
+completed), `status.results` of `status.items` screenshots done, `status.estimate`, `environment`, and
+`executionTime`. Beware: bare output `1` means **completed**, but `state: 1` means **in progress**.
+
+(That is what the `get-screenshot-info` skill does.)
+
 Set the captured run as the project baseline in one step:
 
 ```bash

@@ -62,7 +62,8 @@ Notes:
 - The command prints the `SCREENSHOT_ID` to stdout — capture it with `$(...)`:
   `SCREENSHOT_ID=$(diffy screenshot:create <PROJECT_ID> production --wait)`.
 - `--wait` polls every 10s until Diffy finishes capturing (default `--max-wait=1200` seconds). Without it
-  the command returns immediately and Diffy keeps working in the background; the ID is still valid.
+  the command returns immediately and Diffy keeps working in the background; the ID is still valid — use
+  `get-screenshot-info` later to check whether the set has finished.
 - `custom` without `--envUrl` errors — always supply the URL for `custom`.
 
 ### Setting a baseline instead

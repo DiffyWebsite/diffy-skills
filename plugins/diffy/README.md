@@ -24,6 +24,7 @@ their namespaced names (`/diffy:<skill>`). **When a request doesn't say where to
 | `/diffy:update-project-settings` | either | Edit an existing project's pages, environments, breakpoints, masks, login, schedule, etc. |
 | `/diffy:upload-screenshot` | local | Capture a running app in the screenshot-worker container and upload it as a Diffy screenshot set. |
 | `/diffy:remote-screenshot` | remote | Ask Diffy to screenshot an environment (production/staging/development or a custom URL) on its servers. |
+| `/diffy:get-screenshot-info` | either | Check whether a screenshot set finished capturing; list recent screenshot sets. |
 | `/diffy:compare-screenshots` | either | Create a diff from two existing screenshot set IDs. |
 | `/diffy:get-diff-info` | either | Fetch and summarize a diff: % changed, per-page/per-breakpoint table, report link, JUnit. |
 | `/diffy:visual-diff` | local | End-to-end before/after regression on your **local** UI: baseline, edit, then compare. |

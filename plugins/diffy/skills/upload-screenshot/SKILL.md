@@ -102,7 +102,8 @@ Return:
 - app URL captured
 - capture source (`running app via screenshot-worker container`)
 
-Stop there. Tell the user to use `compare-screenshots` when they want to compare this screenshot set.
+Stop there. Tell the user to use `compare-screenshots` when they want to compare this screenshot set, or
+`get-screenshot-info` to confirm the set finished processing on Diffy's side.
 
 This skill writes metadata under `.diffy-skills/`; offer to add `.diffy-skills/` to the repo's
 `.gitignore` if it is not already ignored.

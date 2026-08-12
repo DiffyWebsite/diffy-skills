@@ -34,6 +34,7 @@ Claude also invokes them automatically based on your request.
 | `/diffy:update-project-settings` | either | Edit pages, environments, breakpoints, masks, login, schedule, etc. |
 | `/diffy:upload-screenshot` | local | Capture a running app in the screenshot-worker container and upload it. |
 | `/diffy:remote-screenshot` | remote | Ask Diffy to screenshot an environment on its servers. |
+| `/diffy:get-screenshot-info` | either | Check whether a screenshot set finished capturing; list recent sets. |
 | `/diffy:compare-screenshots` | either | Create a diff from two existing screenshot set IDs. |
 | `/diffy:get-diff-info` | either | Summarize a diff: % changed, per-page/breakpoint table, report link, JUnit. |
 | `/diffy:visual-diff` | local | End-to-end before/after regression on your **local** UI. |
