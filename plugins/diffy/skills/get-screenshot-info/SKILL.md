@@ -23,6 +23,20 @@ or change project settings in this skill.
      `wget -O /usr/local/bin/diffy https://github.com/diffywebsite/diffy-cli/releases/latest/download/diffy.phar && chmod a+x /usr/local/bin/diffy`
 2. Check authentication: `~/.diffy-cli/diffy-cli.yaml` must exist. If it does not, run
    `diffy auth:login <API_KEY>` after the user provides the key (key from https://app.diffy.website/#/keys).
+3. Check the CLI supports this skill — `screenshot:get-status` landed in **0.1.55**. Probe for the command
+   itself rather than parsing `diffy --version`:
+   ```bash
+   diffy list --raw | grep -q '^screenshot:get-status'
+   ```
+   Needs no API key, so it is safe to run before auth. If it exits non-zero the CLI is too old: tell the
+   user they need `diffy` 0.1.55 or newer and to reinstall the phar with the one-liner above — it always
+   fetches the latest release — then stop until they have. This CLI has **no `self:update` command**;
+   reinstalling the phar is the only upgrade path. Users on `./vendor/bin/diffy` upgrade with
+   `composer update diffy-website/diffy-cli` instead.
+
+   Do not gate on `diffy --version`. Released phars have historically reported a stale version string
+   (every build from 0.1.50 through 0.1.54 reports `DiffyCli 0.1.49`), so the command list is the only
+   trustworthy signal.
 
 ## Resolve the Screenshot
 
@@ -74,9 +88,9 @@ conditional; use `--format=json` whenever you report to the user.
 Exit code is `0` whether or not the set is complete, so branch on the output, not on the status code.
 
 If the command errors with `Command "screenshot:get-status" is not defined`, or with
-`Format value is not supported`, the installed `diffy` CLI is older than this command. Tell the user to
-update it (`diffy self:update`, or re-run the phar install one-liner from Preflight) and stop — do not fall
-back to guessing status from `screenshot:list`.
+`Format value is not supported`, the installed `diffy` CLI predates 0.1.55 — the Preflight probe should
+have caught this. Tell the user to reinstall the phar (see Preflight) and stop; do not fall back to
+guessing status from `screenshot:list`, which carries no state field.
 
 ## Waiting
 

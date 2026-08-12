@@ -35,12 +35,22 @@ granular building blocks you can compose yourself.
 
 ## Prerequisites
 
-- **`diffy` CLI** on `PATH` (or `./vendor/bin/diffy` in the repo). Install the phar:
+- **`diffy` CLI**, **version 0.1.55 or newer**, on `PATH` (or `./vendor/bin/diffy` in the repo). Install
+  the phar:
   ```bash
   wget -O /usr/local/bin/diffy https://github.com/diffywebsite/diffy-cli/releases/latest/download/diffy.phar && chmod a+x /usr/local/bin/diffy
   ```
   Pick a bin directory you can write to — `/usr/local/bin` may need `sudo`; Homebrew on Apple Silicon uses
-  `/opt/homebrew/bin`.
+  `/opt/homebrew/bin`. Check what you have with `diffy list --raw | grep screenshot:get-status` — released
+  phars before 0.1.55 report a stale number from `diffy --version`, so the command list is the reliable
+  check.
+
+  **Upgrading:** re-run that same one-liner — it always fetches the latest release. There is no
+  `diffy self:update` command. If you installed via Composer, use `composer update diffy-website/diffy-cli`.
+
+  Most skills work with older CLI versions; `get-screenshot-info` specifically requires 0.1.55, the release
+  that added `screenshot:get-status`. It probes for the command and tells you to upgrade rather than failing
+  with a confusing "command is not defined" error.
 - **Authentication:** `diffy auth:login <API_KEY>` (get a key at https://app.diffy.website/#/keys). Stored
   in `~/.diffy-cli/diffy-cli.yaml`.
 - **Docker** (only for the **local** skills `upload-screenshot` and `visual-diff`) — local capture runs
