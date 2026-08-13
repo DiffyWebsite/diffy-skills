@@ -21,22 +21,33 @@ or change project settings in this skill.
      directory the user can write to — `/usr/local/bin` may need `sudo`; Homebrew on Apple Silicon uses
      `/opt/homebrew/bin`):
      `wget -O /usr/local/bin/diffy https://github.com/diffywebsite/diffy-cli/releases/latest/download/diffy.phar && chmod a+x /usr/local/bin/diffy`
-2. Check authentication: `~/.diffy-cli/diffy-cli.yaml` must exist. If it does not, run
-   `diffy auth:login <API_KEY>` after the user provides the key (key from https://app.diffy.website/#/keys).
-3. Check the CLI supports this skill — `screenshot:get-status` landed in **0.1.55**. Probe for the command
-   itself rather than parsing `diffy --version`:
+2. Keep the CLI up to date. Compare the installed build against the latest published release:
+   ```bash
+   diffy --version | awk '{print $NF}'                                     # installed, e.g. 0.1.55
+   curl -fsSLI -o /dev/null -w '%{url_effective}' \
+     https://github.com/DiffyWebsite/diffy-cli/releases/latest | sed 's#.*/tag/##'    # latest
+   ```
+   If the installed build is behind, upgrade before continuing:
+   - **Phar install** (`command -v diffy` resolves outside a `vendor/` directory) — re-run the install
+     one-liner from step 1, writing to the path `command -v diffy` reports. This overwrites that binary and
+     may need `sudo`, so say what you are about to run and get the user's go-ahead first.
+   - **Composer install** (`./vendor/bin/diffy`) — `composer update diffy-website/diffy-cli`.
+
+   There is no `diffy self:update` command; reinstalling is the only upgrade path.
+
+   Then confirm the upgrade actually took, which is also the real check that this skill can run:
    ```bash
    diffy list --raw | grep -q '^screenshot:get-status'
    ```
-   Needs no API key, so it is safe to run before auth. If it exits non-zero the CLI is too old: tell the
-   user they need `diffy` 0.1.55 or newer and to reinstall the phar with the one-liner above — it always
-   fetches the latest release — then stop until they have. This CLI has **no `self:update` command**;
-   reinstalling the phar is the only upgrade path. Users on `./vendor/bin/diffy` upgrade with
-   `composer update diffy-website/diffy-cli` instead.
+   **Upgrade at most once per session.** Some published phars report a stale version string, so the two
+   numbers may still differ after a successful upgrade. If the command probe passes, continue — mention the
+   mismatch once and move on. Never upgrade a second time to chase the number. If the probe fails after
+   upgrading, stop and tell the user their `diffy` build does not have `screenshot:get-status`.
 
-   Do not gate on `diffy --version`. Released phars have historically reported a stale version string
-   (every build from 0.1.50 through 0.1.54 reports `DiffyCli 0.1.49`), so the command list is the only
-   trustworthy signal.
+   If the `curl` fails (offline, rate-limited, GitHub unreachable), skip the comparison entirely and rely
+   on the command probe alone. A version check failing is never a reason to block the skill.
+3. Check authentication: `~/.diffy-cli/diffy-cli.yaml` must exist. If it does not, run
+   `diffy auth:login <API_KEY>` after the user provides the key (key from https://app.diffy.website/#/keys).
 
 ## Resolve the Screenshot
 
@@ -88,9 +99,9 @@ conditional; use `--format=json` whenever you report to the user.
 Exit code is `0` whether or not the set is complete, so branch on the output, not on the status code.
 
 If the command errors with `Command "screenshot:get-status" is not defined`, or with
-`Format value is not supported`, the installed `diffy` CLI predates 0.1.55 — the Preflight probe should
-have caught this. Tell the user to reinstall the phar (see Preflight) and stop; do not fall back to
-guessing status from `screenshot:list`, which carries no state field.
+`Format value is not supported`, the installed `diffy` CLI is older than the one this skill needs — the
+Preflight upgrade step should have caught this. Tell the user to reinstall (see Preflight) and stop; do not
+fall back to guessing status from `screenshot:list`, which carries no state field.
 
 ## Waiting
 
