@@ -24,7 +24,10 @@
  *   node run-worker.mjs --project-id=12345 --url=http://localhost:3000 [--name="label"]
  *
  * Because capture runs in a container, a local dev server URL (localhost / 127.0.0.1) is rewritten
- * to host.docker.internal so the container can reach your host.
+ * to host.docker.internal so the container can reach your host. Any other hostname that *resolves*
+ * to a loopback address — ddev's *.ddev.site, Lando's *.lndo.site, *.test / *.localhost setups,
+ * etc. — is assumed to mean the same host machine: its literal hostname is kept (so TLS SNI /
+ * vhost routing still match) and routed to the host via an extra container --add-host instead.
  *
  * Worker CODE location is resolved from (first hit wins):
  *   --worker-dir=<path> | $DIFFY_WORKER_DIR | ./diffy-worker | ../diffy-worker | <cache>/diffy-worker
@@ -38,6 +41,7 @@
 
 import { spawn, spawnSync } from 'node:child_process';
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { lookup } from 'node:dns/promises';
 import path from 'node:path';
 import os from 'node:os';
 
@@ -116,19 +120,47 @@ function sh(cmd, cmdArgs, opts = {}) {
   if (r.status !== 0) throw new Error(`${cmd} exited with status ${r.status}`);
 }
 
-// Rewrite a host-local URL so it is reachable from inside the container.
-function containerReachableUrl(rawUrl) {
+const LOCAL_LITERAL_HOSTNAMES = new Set(['localhost', '127.0.0.1', '0.0.0.0', '::1', '[::1]']);
+
+function isLoopbackAddress(address) {
+  return address === '127.0.0.1' || address === '::1' || address === '0.0.0.0' || address.startsWith('127.');
+}
+
+// Figure out how to reach a host-local URL from inside the container. Returns
+// { url, extraHost }: `url` is what to pass to the worker, and `extraHost` — when set — is a
+// hostname that needs an explicit `--add-host <extraHost>:host-gateway` on the container so its
+// DNS resolves to the host machine instead of the container's own loopback.
+async function containerReachableUrl(rawUrl) {
   let u;
   try {
     u = new URL(rawUrl);
   } catch {
-    return rawUrl;
+    return { url: rawUrl, extraHost: null };
   }
-  if (['localhost', '127.0.0.1', '0.0.0.0', '::1', '[::1]'].includes(u.hostname)) {
+
+  if (LOCAL_LITERAL_HOSTNAMES.has(u.hostname)) {
     u.hostname = 'host.docker.internal';
-    return u.toString().replace(/\/+$/, '');
+    return { url: u.toString().replace(/\/+$/, ''), extraHost: null };
   }
-  return rawUrl.replace(/\/+$/, '');
+
+  if (u.hostname === 'host.docker.internal') {
+    return { url: rawUrl.replace(/\/+$/, ''), extraHost: null };
+  }
+
+  // Local dev tooling (ddev, Lando, *.test / *.localhost setups, ...) often serves a custom
+  // hostname whose DNS record resolves to a loopback address. That still means "the host
+  // machine" — but rewriting the URL itself to host.docker.internal would break TLS SNI / the
+  // dev proxy's Host-based vhost routing, so keep the hostname and route it via --add-host.
+  try {
+    const { address } = await lookup(u.hostname);
+    if (isLoopbackAddress(address)) {
+      return { url: rawUrl.replace(/\/+$/, ''), extraHost: u.hostname };
+    }
+  } catch {
+    // Unresolvable in this environment — fall through and treat it as a normal remote URL.
+  }
+
+  return { url: rawUrl.replace(/\/+$/, ''), extraHost: null };
 }
 
 // ---- provisioning ----------------------------------------------------------
@@ -255,7 +287,7 @@ if (checkMode) {
 
   const projectId = required('project-id');
   const rawUrl = required('url').replace(/\/+$/, '');
-  const url = containerReachableUrl(rawUrl);
+  const { url, extraHost } = await containerReachableUrl(rawUrl);
   const name = args.name && args.name !== true ? String(args.name) : '';
 
   if (!apiKey) {
@@ -268,6 +300,8 @@ if (checkMode) {
 
   if (url !== rawUrl) {
     console.error(`Rewrote ${rawUrl} -> ${url} so the container can reach your host.`);
+  } else if (extraHost) {
+    console.error(`${extraHost} resolves to a loopback address — routing it to your host machine (container --add-host).`);
   }
 
   // Env values are passed by name (docker reads them from our env) so the key never lands in argv.
@@ -276,6 +310,7 @@ if (checkMode) {
   const dockerArgs = ['run', '--rm', '-e', 'DIFFY_API_KEY', '-e', 'DIFFY_PROJECT_ID'];
   if (process.env.DIFFY_MAX_WORKERS) dockerArgs.push('-e', 'DIFFY_MAX_WORKERS');
   dockerArgs.push('--add-host', 'host.docker.internal:host-gateway');
+  if (extraHost) dockerArgs.push('--add-host', `${extraHost}:host-gateway`);
   dockerArgs.push('-v', `${workerDir}:/diffy-worker`, '-w', '/diffy-worker');
   dockerArgs.push(IMAGE, 'node', 'diffy-screenshots.js', `--url=${url}`);
   if (name) dockerArgs.push(`--screenshot-name=${name}`);
