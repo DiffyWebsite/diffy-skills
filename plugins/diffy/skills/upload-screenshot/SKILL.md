@@ -18,7 +18,9 @@ worker reads the project's pages, breakpoints, and advanced settings itself, re-
 your local URL, captures every page × breakpoint with the container's Chromium, uploads the set, and
 returns the ID — so there is no local `upload.json` to build and no separate `screenshot:create-uploaded`
 call. The container reaches your host dev server via `host.docker.internal` (the runner rewrites
-`localhost`/`127.0.0.1` for you).
+`localhost`/`127.0.0.1` for you) — and it also detects local dev hostnames that merely *resolve* to a
+loopback address (ddev's `*.ddev.site`, Lando's `*.lndo.site`, `*.test`/`*.localhost` setups, etc.) and
+routes those to your host machine too, without rewriting the hostname itself.
 
 Do not upload pre-existing image files or pre-built payloads, create a visual diff, or summarize
 diff results in this skill.
