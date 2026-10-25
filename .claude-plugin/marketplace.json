@@ -17,7 +17,7 @@
       "homepage": "https://diffy.website/",
       "repository": "https://github.com/DiffyWebsite/diffy-skills",
       "category": "testing",
-      "tags": ["visual-regression", "screenshots", "diffy", "testing", "ui", "local", "remote", "docker", "ci"]
+      "tags": ["visual-regression", "screenshots", "diffy", "testing", "ui", "local", "remote", "docker", "ci", "astro"]
     }
   ],
   "renames": {
