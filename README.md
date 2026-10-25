@@ -39,6 +39,7 @@ Claude also invokes them automatically based on your request.
 | `/diffy:get-diff-info` | either | Summarize a diff: % changed, per-page/breakpoint table, report link, JUnit. |
 | `/diffy:visual-diff` | local | End-to-end before/after regression on your **local** UI. |
 | `/diffy:compare-environments` | remote | Compare two environments server-side. |
+| `/diffy:compare-urls` | remote | Guided compare of two live URLs, from account setup to the shareable report link. |
 
 ## Local development / testing (no install)
 

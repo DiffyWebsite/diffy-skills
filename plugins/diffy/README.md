@@ -29,8 +29,9 @@ their namespaced names (`/diffy:<skill>`). **When a request doesn't say where to
 | `/diffy:get-diff-info` | either | Fetch and summarize a diff: % changed, per-page/per-breakpoint table, report link, JUnit. |
 | `/diffy:visual-diff` | local | End-to-end before/after regression on your **local** UI: baseline, edit, then compare. |
 | `/diffy:compare-environments` | remote | Compare two environments server-side (Diffy screenshots both, then diffs). |
+| `/diffy:compare-urls` | remote | Guided compare of two live URLs (e.g. an Astro site and its preview deploy): sets up a Diffy account if needed, creates the project, waits for the result and returns the shareable report link. |
 
-`visual-diff` (local) and `compare-environments` (remote) are the one-shot orchestrators; the others are
+`visual-diff` (local), `compare-environments` and `compare-urls` (remote) are the one-shot orchestrators; the others are
 granular building blocks you can compose yourself.
 
 ## Prerequisites
@@ -47,7 +48,8 @@ granular building blocks you can compose yourself.
   re-running that same one-liner (it always fetches the latest release) — there is no `diffy self:update`
   command. Composer installs upgrade with `composer update diffy-website/diffy-cli`.
 - **Authentication:** `diffy auth:login <API_KEY>` (get a key at https://app.diffy.website/#/keys). Stored
-  in `~/.diffy-cli/diffy-cli.yaml`.
+  in `~/.diffy-cli/diffy-cli.yaml`. **No account yet?** `compare-urls` can create one for you from your
+  GitHub email (`diffy auth:register`, CLI 0.1.56+) and log this terminal in.
 - **Docker** (only for the **local** skills `upload-screenshot` and `visual-diff`) — local capture runs
   inside Diffy's published `diffywebsite2/screenshot-worker` container, so **Docker must be installed and
   running**. **You don't need to set anything up by hand:** the first time you capture, the plugin runs a
