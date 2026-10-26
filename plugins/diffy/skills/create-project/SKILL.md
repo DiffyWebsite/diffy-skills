@@ -9,6 +9,9 @@ allowed-tools: Bash, Read, Write
 
 # create-project
 
+If the user has no Diffy account yet, or just wants two URLs compared end to end, use the `compare-urls`
+skill instead.
+
 Create Diffy projects only. Do not update existing project settings, upload screenshots, create diffs, or
 summarize diff results in this skill.
 

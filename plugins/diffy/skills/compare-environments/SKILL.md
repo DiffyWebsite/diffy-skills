@@ -21,6 +21,10 @@ This is the remote analog of the `visual-diff` skill.
 no deployed environments named — ask whether to run **remote** (here) or **local**; if local, switch to
 `visual-diff`.
 
+**First-time Diffy users with just two URLs** (no account or project yet, e.g. an Astro site and its
+preview deploy): use the `compare-urls` skill, which sets up the account and project and waits for the
+result.
+
 For exact command syntax and result fields, consult `reference/diffy-cli-remote.md` in this skill folder.
 
 ## Preflight
@@ -70,6 +74,10 @@ Notes:
   `DIFF_ID=$(diffy project:compare <PROJECT_ID> prod stage --wait)`.
 - `--wait` polls every 10s until the diff completes (default `--max-wait=1200` seconds). Without it the
   diff runs in the background and Diffy notifies by email/Slack; the ID is still returned immediately.
+  From CLI 0.1.56 the command exits non-zero (after printing the ID) when the diff fails or times out;
+  older builds stop waiting after about two minutes and exit 0, so check the state with `get-diff-info`.
+  A Bash tool call is capped at 10 minutes, so for long comparisons start without `--wait` and poll
+  `diffy diff:get-result <DIFF_ID> --format=json` instead.
 - `--name` labels the diff in the Diffy UI. If the user gives a name use it exactly; otherwise use a
   concise generated one, e.g. `prod vs stage 2026-07-06`.
 - `--commit-sha=<sha>` attaches a GitHub check for the given commit (CI use).
