@@ -36,6 +36,9 @@ granular building blocks you can compose yourself.
 
 ## Prerequisites
 
+- **PHP 8.2+** on `PATH`. The `diffy` CLI is a PHP archive (phar), so it needs the PHP interpreter even
+  though it bundles everything else. Check with `php -v`; install with `brew install php` (macOS) or
+  `sudo apt install php-cli` (Debian/Ubuntu).
 - **`diffy` CLI** on `PATH` (or `./vendor/bin/diffy` in the repo). Install the phar:
   ```bash
   wget -O /usr/local/bin/diffy https://github.com/diffywebsite/diffy-cli/releases/latest/download/diffy.phar && chmod a+x /usr/local/bin/diffy

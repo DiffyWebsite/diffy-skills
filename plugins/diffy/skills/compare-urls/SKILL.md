@@ -33,12 +33,20 @@ Keep these in this one place so they can be changed without touching the steps b
 
 ## 0. Preflight
 
-1. Resolve the CLI: `diffy` on `PATH`, else `./vendor/bin/diffy`, else ask the user to install it and stop
+1. Check PHP. The CLI is a PHP archive, so it needs PHP 8.2+ on `PATH` even when installed as a phar:
+   ```bash
+   php -r 'exit(PHP_VERSION_ID >= 80200 ? 0 : 1);'
+   ```
+   If `php` is missing or the check fails, stop and tell the user to install or upgrade PHP first, then
+   come back: macOS `brew install php`, Debian/Ubuntu `sudo apt install php-cli` (check that the distro
+   ships 8.2+), Windows https://windows.php.net/download/. Don't install it for them. Re-check once
+   they say it is done.
+2. Resolve the CLI: `diffy` on `PATH`, else `./vendor/bin/diffy`, else ask the user to install it and stop
    until it is available:
    `wget -O /usr/local/bin/diffy https://github.com/diffywebsite/diffy-cli/releases/latest/download/diffy.phar && chmod a+x /usr/local/bin/diffy`
    (pick a bin directory the user can write to; `/usr/local/bin` may need `sudo`, Homebrew on Apple Silicon
    uses `/opt/homebrew/bin`).
-2. Probe for the commands this skill needs:
+3. Probe for the commands this skill needs:
    ```bash
    diffy list --raw | grep -q '^auth:register'
    ```
